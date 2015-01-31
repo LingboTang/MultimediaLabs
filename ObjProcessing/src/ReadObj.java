@@ -23,6 +23,7 @@ import com.sun.j3d.loaders.IncorrectFormatException;
 import com.sun.j3d.loaders.ParsingErrorException;
 import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.objectfile.ObjectFile;
+import com.sun.j3d.utils.applet.MainFrame;
 import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.geometry.ColorCube;
 import com.sun.j3d.utils.universe.SimpleUniverse;
@@ -41,14 +42,31 @@ public class ReadObj extends Applet {
         // Create the root of the branch graph
         BranchGroup objRoot = new BranchGroup();
  
-        TransformGroup trans = new TransformGroup(); 
+        // Create a transform group, so we can manipulate the object
+        TransformGroup trans = new TransformGroup();              
         
-        Scene s = readScene("C:\\Users\\Lingbo\\workspace\\ObjProcessing\\res\\Bunny-499.obj");
+        // create a behavior to allow the user to move the object with the mouse
+        MouseRotate mr = new MouseRotate();
         
-        BranchGroup shape = s.getSceneGroup();
+        // tell the behavior which transform Group it is operating on
+        mr.setTransformGroup(trans);
         
+        // create the bounds for rotate behavior (centered at the origin) 
+        BoundingSphere bounds = new BoundingSphere(new Point3d(10.0,10.0,10.0), 300.0);
+        mr.setSchedulingBounds(bounds);
+        
+        // add the Rotate Behavior to the root.(not the transformGroup
+        objRoot.addChild(mr);
+        
+        
+        // since the transfom in the transformGroup will be changing when we rotate the object
+        // we need to explicitly allow the transform to be read, and written.
         trans.setCapability(trans.ALLOW_TRANSFORM_READ);
         trans.setCapability(trans.ALLOW_TRANSFORM_WRITE);
+        
+        Scene s = readScene("C:\\Users\\Lingbo\\workspace\\ObjProcessing\\res\\Cow-500.obj");
+        
+        BranchGroup shape = s.getSceneGroup();
         
         trans.addChild(shape);
          
@@ -57,9 +75,7 @@ public class ReadObj extends Applet {
         
         // Create a red light that shines for 100m from the origin
 
-        Color3f light1Color = new Color3f(1.8f, 0.1f, 0.1f);
-
-        BoundingSphere bounds = new BoundingSphere(new Point3d(0.0,0.0,0.0), 200.0);
+        Color3f light1Color = new Color3f(2.0f, 0.5f, 0.5f);
 
         Vector3f light1Direction = new Vector3f(4.0f, -7.0f, -12.0f);
 
@@ -68,6 +84,7 @@ public class ReadObj extends Applet {
         light1.setInfluencingBounds(bounds);
 
         objRoot.addChild(light1);
+        
         objRoot.compile();
 
         return objRoot;
@@ -118,4 +135,15 @@ public class ReadObj extends Applet {
         
     }
 	
+	public void destroy() {
+	    u.removeAllLocales();
+	}
+	
+	/*
+     * The following allows the code to be run as an application
+     * as well as an applet
+     */
+    public static void main(String[] args) {
+        new MainFrame(new ViewPyramid(), 256, 256);
+    }
 }
