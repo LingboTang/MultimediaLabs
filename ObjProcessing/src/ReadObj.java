@@ -1,6 +1,9 @@
 import java.applet.Applet;  
 import java.awt.BorderLayout;
 import java.awt.GraphicsConfiguration;
+import java.awt.Scrollbar;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.io.FileNotFoundException;
 import java.net.URI;
 
@@ -13,6 +16,7 @@ import javax.media.j3d.DirectionalLight;
 import javax.media.j3d.Node;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.Shape3D;
+import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.print.DocFlavor.URL;
 import javax.vecmath.Color3f;
@@ -28,7 +32,7 @@ import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.geometry.ColorCube;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 
-public class ReadObj extends Applet {
+public class ReadObj extends Applet implements AdjustmentListener {
 
 	
 	public String filename;
@@ -37,13 +41,31 @@ public class ReadObj extends Applet {
     
 	public BranchGroup branchGroup = null;
 	
+	Scrollbar   sb;
+    Scrollbar	sb2;
+    Scrollbar	sb3;
+    
+    Transform3D sliderXform;
+    Vector3f    sliderVector;
+    
+    TransformGroup sliderTrans;
+	
 	public BranchGroup createSceneGraph() {
 
         // Create the root of the branch graph
         BranchGroup objRoot = new BranchGroup();
- 
+        
+        sliderXform = new Transform3D();
+        sliderVector = new Vector3f();
+        sliderTrans = new TransformGroup(sliderXform);
+        sliderTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        objRoot.addChild(sliderTrans);
+        
+        
         // Create a transform group, so we can manipulate the object
         TransformGroup trans = new TransformGroup();              
+        trans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        sliderTrans.addChild(trans);
         
         // create a behavior to allow the user to move the object with the mouse
         MouseRotate mr = new MouseRotate();
@@ -70,7 +92,7 @@ public class ReadObj extends Applet {
         
         trans.addChild(shape);
          
-        objRoot.addChild(trans);
+        
         // Have Java 3D perform optimizations on this scene graph.
         
         // Create a red light that shines for 100m from the origin
@@ -108,8 +130,14 @@ public class ReadObj extends Applet {
         return s;
 	}
 
-	public ReadObj() {
-	}
+	
+	
+	public void adjustmentValueChanged(AdjustmentEvent e) {
+        sliderVector.set((float)sb2.getValue()/10.0f, (float)sb.getValue()/10.0f, (float)sb3.getValue()/10.0f);
+        sliderXform.setTranslation(sliderVector);
+        sliderTrans.setTransform(sliderXform);
+    }
+	
 	
 	public void init() {
 		
@@ -118,7 +146,19 @@ public class ReadObj extends Applet {
 
         Canvas3D c = new Canvas3D(config);
         add("Center", c);
+        
+        sb = new Scrollbar(Scrollbar.VERTICAL, 0, 1, -10, 10);
+        sb.addAdjustmentListener(this);
+        add("East", sb);
 
+        sb2 = new Scrollbar(Scrollbar.HORIZONTAL, 0, 1, -10, 10);
+        sb2.addAdjustmentListener(this);
+        add("South", sb2);
+        
+        sb3 = new Scrollbar(Scrollbar.HORIZONTAL, 0, 1, -10, 10);
+        sb3.addAdjustmentListener(this);
+        add("North", sb3);
+        
         // Create a simple scene and attach it to the virtual universe
         BranchGroup template = createSceneGraph();
         
