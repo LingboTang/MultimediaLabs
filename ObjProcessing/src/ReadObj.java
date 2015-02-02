@@ -4,7 +4,10 @@ import java.awt.GraphicsConfiguration;
 import java.awt.Scrollbar;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 
 import javax.swing.JPanel;
@@ -40,6 +43,8 @@ public class ReadObj extends Applet implements AdjustmentListener {
 	public SimpleUniverse u = null;
     
 	public BranchGroup branchGroup = null;
+	
+	public static String objpath;
 	
 	Scrollbar   sb;
     Scrollbar	sb2;
@@ -86,20 +91,37 @@ public class ReadObj extends Applet implements AdjustmentListener {
         trans.setCapability(trans.ALLOW_TRANSFORM_READ);
         trans.setCapability(trans.ALLOW_TRANSFORM_WRITE);
         
+        // Create a new Appearance
+        
+        
+        
         Scene s = readScene("C:\\Users\\Lingbo\\workspace\\ObjProcessing\\res\\Cow-500.obj");
         
-        BranchGroup shape = s.getSceneGroup();
+        BranchGroup scenegroup = s.getSceneGroup();
         
-        trans.addChild(shape);
+        Appearance appearance = new Appearance();
+        appearance.setTexture(null);
+        
+        // Create the polygon attributes to display only the wireframe
+        PolygonAttributes pa = new PolygonAttributes();
+        pa.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
+        pa.setPolygonMode(pa.POLYGON_LINE);
+        pa.setCullFace(pa.CULL_NONE);
+        // set the polygon attributes
+        Shape3D Poly = (Shape3D)scenegroup.getChild(0);
+        appearance.setPolygonAttributes(pa);
+        Poly.setAppearance(appearance);
+        
+        trans.addChild(scenegroup);
          
         
         // Have Java 3D perform optimizations on this scene graph.
         
         // Create a red light that shines for 100m from the origin
 
-        Color3f light1Color = new Color3f(2.0f, 0.5f, 0.5f);
+        Color3f light1Color = new Color3f(0.5f, 0.5f, 0.5f);
 
-        Vector3f light1Direction = new Vector3f(4.0f, -7.0f, -12.0f);
+        Vector3f light1Direction = new Vector3f(2.0f, -5.0f, -8.0f);
 
         DirectionalLight light1 = new DirectionalLight(light1Color, light1Direction);
 
@@ -133,7 +155,7 @@ public class ReadObj extends Applet implements AdjustmentListener {
 	
 	
 	public void adjustmentValueChanged(AdjustmentEvent e) {
-        sliderVector.set((float)sb2.getValue()/10.0f, (float)sb.getValue()/10.0f, (float)sb3.getValue()/10.0f);
+        sliderVector.set((float)sb2.getValue()/20.0f, (float)sb.getValue()/20.0f, (float)sb3.getValue()/5.0f);
         sliderXform.setTranslation(sliderVector);
         sliderTrans.setTransform(sliderXform);
     }
@@ -184,6 +206,16 @@ public class ReadObj extends Applet implements AdjustmentListener {
      * as well as an applet
      */
     public static void main(String[] args) {
-        new MainFrame(new ViewPyramid(), 256, 256);
+    	String displaymatrix;
+    	System.out.print("Enter obj file path: ");
+    	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    	try {
+    		objpath = br.readLine();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    		System.exit(1);
+    	}
+    	System.out.println();
+        new MainFrame(new ReadObj(), 256, 256);
     }
 }
