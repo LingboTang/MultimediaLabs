@@ -1,0 +1,23 @@
+Package: CMPUT 414 Lab 3
+
+Author: Lingbo Tang
+
+I wrote this simple 3D viewer on windows 8 eclipse.
+
+Therefore, if you want to play with my viewer. 
+
+Simply use eclipse or just compile the file without using the command line.
+
+My viewer will require you to input the Object file path.
+
+Note that:
+	
+	1. The scroll bar on the top (north) is used to adjust the scale of the object
+
+	2. The scroll bar on the right (east) is used to adjust the vertical position of the object.
+
+	3. The scroll bar on the buttom (south) is used to adjust the horizontal position of the object.
+
+If still have any problem, I can demo it on my own machine.
+
+Have fun with this
