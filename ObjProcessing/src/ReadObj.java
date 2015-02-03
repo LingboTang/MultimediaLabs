@@ -58,6 +58,9 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 	public static String displayset;
 	
 	public PolygonAttributes pa;
+	private Scene scene = null;
+	
+	private ObjectFile objfile = new ObjectFile(ObjectFile.RESIZE);
 	
 	Scrollbar   sb;
     Scrollbar	sb2;
@@ -108,9 +111,22 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         trans.setCapability(trans.ALLOW_TRANSFORM_READ);
         trans.setCapability(trans.ALLOW_TRANSFORM_WRITE);
         
-        Scene s = readScene("C:\\Users\\Lingbo\\workspace\\ObjProcessing\\res\\Cow-500.obj");
+        //Scene s = readScene(objpath);
         
-        BranchGroup scenegroup = s.getSceneGroup();
+        try {  
+        	scene = objfile.load(objpath);  
+        } catch (FileNotFoundException e) {  
+            System.err.println(e);  
+            System.exit(1);  
+        } catch (ParsingErrorException e) {  
+            System.err.println(e);  
+            System.exit(1);  
+        } catch (IncorrectFormatException e) {  
+            System.err.println(e);  
+            System.exit(1);  
+        }         
+        
+        BranchGroup scenegroup = scene.getSceneGroup();
         
         // Create a new Appearance
         Appearance appearance = new Appearance();
@@ -148,7 +164,7 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         return objRoot;
     }
 
-	public Scene readScene(String filename) {
+	/*public Scene readScene(String filename) {
 		
         ObjectFile f = new ObjectFile();
         Scene s = null;
@@ -164,7 +180,7 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
             
         }
         return s;
-	}
+	}*/
 
 	
 	
@@ -232,31 +248,15 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
      * as well as an applet
      */
 	public static void main(String[] args) {
-    	Integer displaymode = null;
-        System.out.print("Enter obj address: ");
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        try {
-        	objpath = br.readLine();
-        } catch (IOException ioe) {
-           System.out.println("IO error trying to read your address!");
-           System.exit(1);
-        }
-        System.out.println("The obj file address is: " + objpath + ", then we goona ask you for the display setting.");
-        System.out.println("enter 1 for mesh, 2 for point, 3 for skinning.");
-        System.out.print("Enter the display type: ");
-        BufferedReader dr = new BufferedReader(new InputStreamReader(System.in));
-        try {
-        	displayset = dr.readLine();
-        	displaymode = Integer.parseInt(displayset);
-        } catch (NumberFormatException ex) {
-            System.err.println("Not a valid number: " + displayset);
-        } catch (IOException e) {
-            System.err.println("Unexpected IO ERROR: " + e);
-        }
-        System.out.println("You have chosen the display type as setting " + displaymode);
-        System.out.println("Please drag the right scrollbar for moving in y direction");
-        System.out.println("Please drag the bottom scrollbar for moving in x direction");
-        System.out.println("Please drag the top scrollbar for zoom in and out");
+    	System.out.print("Enter obj address: ");
+    	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    	try {
+    		objpath = br.readLine();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    		System.exit(1);
+    	}
+    	System.out.println("The obj file address is: " + objpath);
         new MainFrame(new ReadObj(), 256, 256);
     }
 
@@ -270,11 +270,10 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 		else if (e.getSource() == lines)
 		{
 		    pa.setPolygonMode(pa.POLYGON_LINE);
-		   
 		}
 		else if (e.getSource() == mesh)
 		{
-			
+			pa.setPolygonMode(pa.POLYGON_FILL);
 		}
 	}
 }
