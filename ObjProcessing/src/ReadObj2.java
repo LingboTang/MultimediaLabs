@@ -39,7 +39,7 @@ import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.geometry.ColorCube;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 
-public class ReadObj extends Applet implements AdjustmentListener, ActionListener {
+public class ReadObj2 extends Applet implements AdjustmentListener, ActionListener {
 
 	
 	/**
