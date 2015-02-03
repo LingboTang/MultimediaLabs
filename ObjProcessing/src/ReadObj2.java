@@ -190,6 +190,7 @@ public class ReadObj2 extends Applet implements AdjustmentListener, ActionListen
         sliderTrans.setTransform(sliderXform);
     }
 	
+	public ReadObj2() {}
 	
 	public void init() {
 		
