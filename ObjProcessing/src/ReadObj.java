@@ -1,7 +1,11 @@
-import java.applet.Applet;  
+import java.applet.Applet;   
 import java.awt.BorderLayout;
+import java.awt.Button;
 import java.awt.GraphicsConfiguration;
+import java.awt.Panel;
 import java.awt.Scrollbar;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.io.BufferedReader;
@@ -35,9 +39,14 @@ import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.geometry.ColorCube;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 
-public class ReadObj extends Applet implements AdjustmentListener {
+public class ReadObj extends Applet implements AdjustmentListener, ActionListener {
 
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public String filename;
 
 	public SimpleUniverse u = null;
@@ -45,6 +54,10 @@ public class ReadObj extends Applet implements AdjustmentListener {
 	public BranchGroup branchGroup = null;
 	
 	public static String objpath;
+	
+	public static String displayset;
+	
+	public PolygonAttributes pa;
 	
 	Scrollbar   sb;
     Scrollbar	sb2;
@@ -54,6 +67,10 @@ public class ReadObj extends Applet implements AdjustmentListener {
     Vector3f    sliderVector;
     
     TransformGroup sliderTrans;
+    
+    private Button points = new Button("Points");
+    private Button lines = new Button("Line");
+    private Button mesh = new Button("Mesh");
 	
 	public BranchGroup createSceneGraph() {
 
@@ -91,21 +108,18 @@ public class ReadObj extends Applet implements AdjustmentListener {
         trans.setCapability(trans.ALLOW_TRANSFORM_READ);
         trans.setCapability(trans.ALLOW_TRANSFORM_WRITE);
         
-        // Create a new Appearance
-        
-        
-        
         Scene s = readScene("C:\\Users\\Lingbo\\workspace\\ObjProcessing\\res\\Cow-500.obj");
         
         BranchGroup scenegroup = s.getSceneGroup();
         
+        // Create a new Appearance
         Appearance appearance = new Appearance();
         appearance.setTexture(null);
         
         // Create the polygon attributes to display only the wireframe
-        PolygonAttributes pa = new PolygonAttributes();
+        pa = new PolygonAttributes();
         pa.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
-        pa.setPolygonMode(pa.POLYGON_LINE);
+        pa.setPolygonMode(pa.POLYGON_FILL);
         pa.setCullFace(pa.CULL_NONE);
         // set the polygon attributes
         Shape3D Poly = (Shape3D)scenegroup.getChild(0);
@@ -181,6 +195,18 @@ public class ReadObj extends Applet implements AdjustmentListener {
         sb3.addAdjustmentListener(this);
         add("North", sb3);
         
+        Panel p =new Panel();
+        p.add(points);
+        add("West",p);
+        points.addActionListener(this);
+        p.add(lines);
+        add("West",p);
+        lines.addActionListener(this);
+        p.add(mesh);
+        add("West",p);
+        mesh.addActionListener(this);
+
+        
         // Create a simple scene and attach it to the virtual universe
         BranchGroup template = createSceneGraph();
         
@@ -205,17 +231,50 @@ public class ReadObj extends Applet implements AdjustmentListener {
      * The following allows the code to be run as an application
      * as well as an applet
      */
-    public static void main(String[] args) {
-    	String displaymatrix;
-    	System.out.print("Enter obj file path: ");
-    	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-    	try {
-    		objpath = br.readLine();
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    		System.exit(1);
-    	}
-    	System.out.println();
+	public static void main(String[] args) {
+    	Integer displaymode = null;
+        System.out.print("Enter obj address: ");
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        try {
+        	objpath = br.readLine();
+        } catch (IOException ioe) {
+           System.out.println("IO error trying to read your address!");
+           System.exit(1);
+        }
+        System.out.println("The obj file address is: " + objpath + ", then we goona ask you for the display setting.");
+        System.out.println("enter 1 for mesh, 2 for point, 3 for skinning.");
+        System.out.print("Enter the display type: ");
+        BufferedReader dr = new BufferedReader(new InputStreamReader(System.in));
+        try {
+        	displayset = dr.readLine();
+        	displaymode = Integer.parseInt(displayset);
+        } catch (NumberFormatException ex) {
+            System.err.println("Not a valid number: " + displayset);
+        } catch (IOException e) {
+            System.err.println("Unexpected IO ERROR: " + e);
+        }
+        System.out.println("You have chosen the display type as setting " + displaymode);
+        System.out.println("Please drag the right scrollbar for moving in y direction");
+        System.out.println("Please drag the bottom scrollbar for moving in x direction");
+        System.out.println("Please drag the top scrollbar for zoom in and out");
         new MainFrame(new ReadObj(), 256, 256);
     }
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == points)
+		{   
+		    pa.setPolygonMode(pa.POLYGON_POINT);
+		    
+		}
+		else if (e.getSource() == lines)
+		{
+		    pa.setPolygonMode(pa.POLYGON_LINE);
+		   
+		}
+		else if (e.getSource() == mesh)
+		{
+			
+		}
+	}
 }
