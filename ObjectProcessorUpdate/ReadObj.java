@@ -23,6 +23,7 @@ import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Canvas3D;
 import javax.media.j3d.DirectionalLight;
+import javax.media.j3d.Material;
 import javax.media.j3d.Node;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.Shape3D;
@@ -64,6 +65,7 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 
 	private SimpleUniverse u = null;
 	private static String objpath="";
+	private static String texturepath ="";
 	private ObjectFile objfile = new ObjectFile(ObjectFile.RESIZE);
 	private PolygonAttributes pa;
 	private Scene s = null;
@@ -91,6 +93,13 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
     private String baseHost = "";
     private String baseFile = "";
 	
+    /**
+     * Texture color
+     */
+    private Color3f black = new Color3f(0.0f, 0.0f, 0.0f);
+    private Color3f white = new Color3f(1.0f, 1.0f, 1.0f);
+    private Color3f red = new Color3f(0.7f, .15f, .15f);
+    
 	public BranchGroup createSceneGraph() {
 
         // Create the root of the branch graph
@@ -137,10 +146,10 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         // use a texture loader to get the texture file.
         //Texture tex = new TextureLoader(url, this).getTexture();
         
-        TextureLoader loader = new TextureLoader("F:\\Daisy.jpg",
-        	    "RGP", new Container());
+        //TextureLoader loader = new TextureLoader(texturepath,"RPG", new Container());
         
-        Texture texture = loader.getTexture();
+        Texture texture = new TextureLoader(texturepath, this).getTexture();
+        //Texture texture = loader.getTexture();
         texture.setBoundaryModeS(Texture.WRAP);
         texture.setBoundaryModeT(Texture.WRAP);
         texture.setBoundaryColor(new Color4f(0.0f, 1.0f, 0.0f, 0.0f));
@@ -152,6 +161,7 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         // Specify that we ARE using a texture
         appearance.setTexture(texture);
         appearance.setTextureAttributes(texAttr);
+        appearance.setMaterial(new Material(red, black, red, black, 1.0f));
         int primflags = Primitive.GENERATE_NORMALS + Primitive.GENERATE_TEXTURE_COORDS;
         
         Scene s = readScene(objpath);
@@ -302,6 +312,15 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
     		System.exit(1);
     	}
     	System.out.println("The obj file address is: " + objpath);
+    	System.out.print("Enter texture address: ");
+    	BufferedReader br2 = new BufferedReader(new InputStreamReader(System.in));
+    	try {
+    		texturepath = br2.readLine();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    		System.exit(1);
+    	}
+    	System.out.println("The texture file address is: " + objpath);
         new MainFrame(new ReadObj(), 512, 512);
     }
 
