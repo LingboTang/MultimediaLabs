@@ -86,9 +86,8 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
     private Button points = new Button("Points");
     private Button lines = new Button("Line");
     private Button mesh = new Button("Mesh");
-    private Button nonSkin = new Button("NonSkin");
     private Button skin = new Button("Skin");
-    private int istextured=0;
+    private Button HighDmode = new Button("3DMode");
     
     
     /**
@@ -105,6 +104,10 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
     private Color3f black = new Color3f(0.0f, 0.0f, 0.0f);
     private Color3f white = new Color3f(1.0f, 1.0f, 1.0f);
     private Color3f red = new Color3f(0.7f, .15f, .15f);
+    
+    public ReadObj() {
+		
+    }
     
 	public BranchGroup createSceneGraph() {
 
@@ -144,37 +147,9 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         trans.setCapability(trans.ALLOW_TRANSFORM_WRITE);
         
         
-        /*try{
-            url = new URL("F:\\"+"Daisy.jpg");
-        }catch (java.net.MalformedURLException e){e.printStackTrace();;System.exit(-1);}*/
-        
-        
-        // use a texture loader to get the texture file.
-        //Texture tex = new TextureLoader(url, this).getTexture();
-        
         //TextureLoader loader = new TextureLoader(texturepath,"RPG", new Container());
         
-        texture = new TextureLoader(texturepath, this).getTexture();
-        //Texture texture = loader.getTexture();
-        texture.setBoundaryModeS(Texture.WRAP);
-        texture.setBoundaryModeT(Texture.WRAP);
-        texture.setBoundaryColor(new Color4f(0.0f, 1.0f, 0.0f, 0.0f));
-        texAttr = new TextureAttributes();
-        texAttr.setTextureMode(TextureAttributes.MODULATE);
-        // Create a new Appearance
-        appearance = new Appearance();
         
-        // Specify that we ARE using a texture
-        appearance.setCapability(Appearance.ALLOW_TEXTURE_ATTRIBUTES_WRITE);
-        if (istextured == 0)
-        {
-        	appearance.setTexture(texture);
-        	istextured =1;
-        }else {
-        	appearance.setTexture(null);
-        	istextured = 0;
-        }
-        appearance.setTextureAttributes(texAttr);
         //appearance.setMaterial(new Material(red, black, red, black, 1.0f));
         //int primflags = Primitive.GENERATE_NORMALS + Primitive.GENERATE_TEXTURE_COORDS;
         
@@ -236,8 +211,7 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         return s;
 	}
 
-	public ReadObj() {
-    }
+	
 	
 	
 	public void adjustmentValueChanged(AdjustmentEvent e) {
@@ -292,14 +266,31 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         p.add(mesh);
         add("West",p);
         mesh.addActionListener(this);
-        p.add(nonSkin);
-        add("West",p);
-        nonSkin.addActionListener(this);
         p.add(skin);
         add("West",p);
         skin.addActionListener(this);
+        p.add(HighDmode);
+        add("West",p);
+        HighDmode.addActionListener(this);
 
+        texture = new TextureLoader(texturepath, this).getTexture();
+        //texture = loader.getTexture();
+        texture.setBoundaryModeS(Texture.WRAP);
+        texture.setBoundaryModeT(Texture.WRAP);
+        texture.setBoundaryColor(new Color4f(0.0f, 1.0f, 0.0f, 0.0f));
+        texAttr = new TextureAttributes();
+        texAttr.setTextureMode(TextureAttributes.MODULATE);
+        // Create a new Appearance
+        appearance = new Appearance();
         
+        // Specify that we ARE using a texture
+        //appearance.setCapability(Appearance.ALLOW_TEXTURE_ATTRIBUTES_WRITE);
+        
+
+        appearance.setCapability(Appearance.ALLOW_TEXTURE_WRITE);
+        //appearance.setTexture(null);
+
+        appearance.setTextureAttributes(texAttr);
         // Create a simple scene and attach it to the virtual universe
         BranchGroup template = createSceneGraph();
         
@@ -361,17 +352,16 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 		{
 			pa.setPolygonMode(pa.POLYGON_FILL);
 		}
-		else if (e.getSource() == nonSkin) {
-			if (istextured ==1){
+		else if (e.getSource() == skin) {
+			if (appearance.getTexture()!= null){
 				appearance.setTexture(null);
-				istextured = 0;
+			}
+			else if (appearance.getTexture() == null) {
+				appearance.setTexture(texture);
 			}
 		}
-		else if (e.getSource() == skin) {
-			if (istextured == 0) {
-				appearance.setTexture(texture);
-				istextured = 1;
-			}
+		else if (e.getSource() == HighDmode) {
+			
 		}
 	}
 	
