@@ -69,7 +69,9 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 	private ObjectFile objfile = new ObjectFile(ObjectFile.RESIZE);
 	private PolygonAttributes pa;
 	private Scene s = null;
-	
+	private Texture texture;
+	private TextureAttributes texAttr;
+	private Appearance appearance;
 	
 	/**
 	 * UI part
@@ -84,6 +86,10 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
     private Button points = new Button("Points");
     private Button lines = new Button("Line");
     private Button mesh = new Button("Mesh");
+    private Button nonSkin = new Button("NonSkin");
+    private Button skin = new Button("Skin");
+    private int istextured=0;
+    
     
     /**
      * Texture file
@@ -148,21 +154,29 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         
         //TextureLoader loader = new TextureLoader(texturepath,"RPG", new Container());
         
-        Texture texture = new TextureLoader(texturepath, this).getTexture();
+        texture = new TextureLoader(texturepath, this).getTexture();
         //Texture texture = loader.getTexture();
         texture.setBoundaryModeS(Texture.WRAP);
         texture.setBoundaryModeT(Texture.WRAP);
         texture.setBoundaryColor(new Color4f(0.0f, 1.0f, 0.0f, 0.0f));
-        TextureAttributes texAttr = new TextureAttributes();
+        texAttr = new TextureAttributes();
         texAttr.setTextureMode(TextureAttributes.MODULATE);
         // Create a new Appearance
-        Appearance appearance = new Appearance();
+        appearance = new Appearance();
         
         // Specify that we ARE using a texture
-        appearance.setTexture(texture);
+        appearance.setCapability(Appearance.ALLOW_TEXTURE_ATTRIBUTES_WRITE);
+        if (istextured == 0)
+        {
+        	appearance.setTexture(texture);
+        	istextured =1;
+        }else {
+        	appearance.setTexture(null);
+        	istextured = 0;
+        }
         appearance.setTextureAttributes(texAttr);
-        appearance.setMaterial(new Material(red, black, red, black, 1.0f));
-        int primflags = Primitive.GENERATE_NORMALS + Primitive.GENERATE_TEXTURE_COORDS;
+        //appearance.setMaterial(new Material(red, black, red, black, 1.0f));
+        //int primflags = Primitive.GENERATE_NORMALS + Primitive.GENERATE_TEXTURE_COORDS;
         
         Scene s = readScene(objpath);
         
@@ -178,8 +192,10 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         pa.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
         pa.setPolygonMode(pa.POLYGON_FILL);
         pa.setCullFace(pa.CULL_NONE);
+        
         // set the polygon attributes
         Shape3D Poly = (Shape3D)scenegroup.getChild(0);
+        Poly.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
         appearance.setPolygonAttributes(pa);
         Poly.setAppearance(appearance);
         
@@ -276,6 +292,12 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         p.add(mesh);
         add("West",p);
         mesh.addActionListener(this);
+        p.add(nonSkin);
+        add("West",p);
+        nonSkin.addActionListener(this);
+        p.add(skin);
+        add("West",p);
+        skin.addActionListener(this);
 
         
         // Create a simple scene and attach it to the virtual universe
@@ -338,6 +360,18 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 		else if (e.getSource() == mesh)
 		{
 			pa.setPolygonMode(pa.POLYGON_FILL);
+		}
+		else if (e.getSource() == nonSkin) {
+			if (istextured ==1){
+				appearance.setTexture(null);
+				istextured = 0;
+			}
+		}
+		else if (e.getSource() == skin) {
+			if (istextured == 0) {
+				appearance.setTexture(texture);
+				istextured = 1;
+			}
 		}
 	}
 	
