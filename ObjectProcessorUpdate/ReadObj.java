@@ -42,8 +42,8 @@ import com.sun.j3d.utils.universe.SimpleUniverse;
 
 
 // At first create 3 scenegroup move it let 2 untransperent when click the 3D mode
-// Remove the Textured one and then display the 2.
-// For specific comments, just look at my lab 3.
+// Remove the Textured one and then display the 2. This is another way to sovle this problem
+
 
 public class ReadObj extends Applet implements AdjustmentListener, ActionListener {
 
@@ -53,6 +53,11 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 	 */
 	private static final long serialVersionUID = 1L;
 
+	
+	/**
+	 * File path, Simple Universe and BranchGroup
+	 * are the most important part of the program.
+	 */
 	private SimpleUniverse u = null;
 	private static String objpath="";
 	private static String texturepath ="";
@@ -67,21 +72,30 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 	private BranchGroup template2,template;
 	private static TransparencyAttributes TA;
 	
-	private Scrollbar   sb;
-    private Scrollbar	sb2;
-    private Scrollbar	sb3;
-    private Transform3D trans3d,trans3d2;
-    private Shape3D Poly;
-    private Vector3f    sliderVector;
-    private TransformGroup sliderTrans,sliderTrans2;
-    private Panel p = new Panel();
-    private Button points = new Button("Points");
-    private Button lines = new Button("Line");
-    private Button mesh = new Button("Mesh");
-    private Button skin = new Button("Skin");
-    private Button HighDmode = new Button("3DMode");
-    private int is3D = 0;
 	
+
+	/**
+	 * UI part
+	 */
+	private Scrollbar   sb;
+	private Scrollbar	sb2;
+	private Scrollbar	sb3;
+	private Transform3D transvec,transvec2;
+	private Shape3D Poly;
+	private Vector3f    sliderVector;
+	private TransformGroup sliderTrans,sliderTrans2;
+	private Panel p = new Panel();
+	private Button points = new Button("Points");
+	private Button lines = new Button("Line");
+	private Button mesh = new Button("Mesh");
+	private Button skin = new Button("Skin");
+	private Button HighDmode = new Button("3DMode");
+	private int HDmode_flag = 0;
+    
+    /**
+     * Texture color and initial position
+     */
+    
     private Color3f black = new Color3f(0.0f, 0.0f, 0.0f);
     private Color3f white = new Color3f(1.0f, 1.0f, 1.0f);
     private Color3f red = new Color3f(1.0f, 0.0f, 0.0f);
@@ -91,10 +105,27 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
     private static float x = 0.0f, y=0.0f, z=0.0f;
     
     
+    /**
+     * 
+     */
     
     public ReadObj() {
 		
     }
+    
+    
+    /**
+     * Why I need to pass in the transform group and appearance into the createSceneGraph
+     * Function? Because I actually found that we can't set the new appearance and new transform
+     * group to the compiled branchgroup. However, if I change them outside the creator and pass 
+     * them in the creator. It will work.
+     * 
+     * @param Ttrans
+     * @param HD
+     * @param ap
+     * @return
+     */
+    
     
 	public BranchGroup createSceneGraph(TransformGroup Ttrans, Transform3D HD, Appearance ap) {
 
@@ -104,9 +135,6 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         objRoot.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
         objRoot.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
         objRoot.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
-        
-        
-        // Add basic transform group
         
         // Add Rotate mouse Group
         MouseRotate mr = new MouseRotate();
@@ -118,8 +146,6 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         // Add Scene Branchgroup
         s = readScene(objpath);
         scenegroup = s.getSceneGroup();
-        //Scene s2 = readScene(objpath);
-        //BranchGroup scenegroup2 = s2.getSceneGroup();
         
         // Add Writbale polygon attributes 
         Poly = (Shape3D)scenegroup.getChild(0);
@@ -144,6 +170,12 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
     }
 
 	// Read the OBJ file
+	/**
+	 * Take the object file name and load it
+	 * 
+	 * @param filename
+	 * @return
+	 */
 	public Scene readScene(String filename) {
         Scene s = null;
         try {
@@ -162,14 +194,29 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 	}
 
 	// Add just the coordinate translation to the X,Y and Z axis
+	/**
+	 * 
+	 * Scrollbar listener to get the vector transform value
+	 * sb2 is to adjust the x position (scene width)
+	 * sb is to adjust the y position (scene height)
+	 * sb3 is to adjust the z position (scene depth)
+	 * They will be calculated by the Vector3d and stored in
+	 * the translated vector.
+	 * 
+	 * @param e
+	 * @return
+	 */
 	public void adjustmentValueChanged(AdjustmentEvent e) {
 		x = (float)sb2.getValue()/20.0f;y=(float)sb.getValue()/20.0f;z = (float)sb3.getValue()/20.0f;
-        trans3d.setTranslation(new Vector3d(x,y,z));
-        trans3d2.setTranslation(new Vector3d(x+0.01f,y,z));
-        sliderTrans.setTransform(trans3d);
-        sliderTrans2.setTransform(trans3d2);
+        transvec.setTranslation(new Vector3d(x,y,z));
+        transvec2.setTranslation(new Vector3d(x+0.01f,y,z));
+        sliderTrans.setTransform(transvec);
+        sliderTrans2.setTransform(transvec2);
     }
 	
+	/**
+	 * 
+	 */
 	public void init() {
 		
 		// Initialize the canvas and the universe
@@ -190,6 +237,9 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         add("North", sb3);
 
         // Add button to switch the mode
+        // "points" to display the point cloud
+        // "lines" to display the lines
+        // "mesh" to display the object covered with mesh
         p.add(points);
         add("West",p);
         points.addActionListener(this);
@@ -213,11 +263,12 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         texture.setBoundaryColor(new Color4f(0.0f, 1.0f, 0.0f, 0.0f));
         texAttr = new TextureAttributes();
         texAttr.setTextureMode(TextureAttributes.MODULATE);
+        // I rearranged them to make them seems more formated.
         appearance = new Appearance();
         appearance.setCapability(Appearance.ALLOW_TEXTURE_WRITE);
         appearance.setCapability(Appearance.ALLOW_POLYGON_ATTRIBUTES_WRITE);
         appearance.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_WRITE);
-        //appearance.setTextureAttributes(texAttr);
+        
         
         appearance2 = new Appearance();
         appearance2.setCapability(Appearance.ALLOW_TEXTURE_WRITE);
@@ -237,23 +288,24 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         
         // Add slider transform group
         
-        trans3d = new Transform3D();
-        trans3d.setTranslation(new Vector3d(x,y,z));
-        trans3d.setScale(0.5);
-        sliderTrans = new TransformGroup(trans3d);
+        transvec = new Transform3D();
+        transvec.setTranslation(new Vector3d(x,y,z));
+        transvec.setScale(0.5);
+        sliderTrans = new TransformGroup(transvec);
         sliderTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         
-        trans3d2 = new Transform3D();
-        trans3d2.setTranslation(new Vector3d(x+0.01f,y,z));
-        trans3d.setScale(0.5);
-        sliderTrans2 = new TransformGroup(trans3d2);
+        transvec2 = new Transform3D();
+        transvec2.setTranslation(new Vector3d(x+0.01f,y,z));
+        transvec.setScale(0.5);
+        sliderTrans2 = new TransformGroup(transvec2);
         sliderTrans2.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         
         // Create two different template
         
-        template2 = createSceneGraph(sliderTrans2,trans3d2,appearance2);       
-        template = createSceneGraph(sliderTrans,trans3d,appearance);
+        template2 = createSceneGraph(sliderTrans2,transvec2,appearance2);       
+        template = createSceneGraph(sliderTrans,transvec,appearance);
  
+        // Set the universe
         u = new SimpleUniverse(c);
         u.getViewingPlatform().setNominalViewingTransform();
         u.addBranchGraph(template);
@@ -290,8 +342,16 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
     }
 
 	// Switch mode listener
+	/**
+	 * This is the Buttom listener that will handle the switch case
+	 * 
+	 * @param e
+     * @return
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		// For Change display Line, Point and Fill settings
+		// we just need to change the pa_flag
 		if (e.getSource() == points)
 		{   
 		    pa.setPolygonMode(pa.POLYGON_POINT);
@@ -305,38 +365,43 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 		{
 			pa.setPolygonMode(pa.POLYGON_FILL);
 		}
-		else if (e.getSource() == skin) {
-			if (is3D == 1){
-    			appearance.setColoringAttributes(null);
-    			template.removeChild(template2);
-    			is3D = 0;
-    		}
+		else if (e.getSource() == skin) {			
 			if (appearance.getTexture()!= null){
 				appearance.setTexture(null);
 			}
 			else if (appearance.getTexture() == null) {
 				appearance.setTexture(texture);
 			}
+			// We need to erase the whole 3D mode
+			// However it will cause the unsythesized branch group
+			// problem,. but I don't have time to solve it.
+			if (HDmode_flag == 1){
+    			appearance.setColoringAttributes(null);
+    			template.removeChild(template2);
+    			HDmode_flag = 0;
+    		}
 		}
 		else if (e.getSource() == HighDmode) {
-			//trans.removeChild(0);
-			appearance.setTexture(null);
-    		if (is3D == 0){
+			// For 3D ones, erase the texture first
+			appearance.setTexture(null);			
+    		if (HDmode_flag == 0){
     			//set transform group2
     			appearance.setColoringAttributes(redT);
-    	        trans3d2 = new Transform3D();
-    	        trans3d2.setTranslation(new Vector3d(x+0.01f,y,z));
-    	        trans3d2.setScale(0.5);
-    	        sliderTrans2 = new TransformGroup(trans3d2); 
+    	        transvec2 = new Transform3D();
+    	        transvec2.setTranslation(new Vector3d(x+0.01f,y,z));
+    	        transvec2.setScale(0.5);
+    	        sliderTrans2 = new TransformGroup(transvec2); 
     	        sliderTrans2.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
     	        sliderTrans2.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-    			template2 = createSceneGraph(sliderTrans2,trans3d2,appearance2);   	
+    			template2 = createSceneGraph(sliderTrans2,transvec2,appearance2);
+    			// Add the second template the first one to make it systhesized
     			template.addChild(template2);
-    			is3D = 1;
-    		}else if (is3D == 1){
+    			HDmode_flag = 1;
+    		}else if (HDmode_flag == 1){
+    			// If we want to set them back just kill them
     			appearance.setColoringAttributes(null);    			
     			template.removeChild(template2);
-    			is3D = 0;
+    			HDmode_flag = 0;
     		}
 		}
 	}
