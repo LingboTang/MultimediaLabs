@@ -59,6 +59,7 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 	private ObjectFile objfile = new ObjectFile(ObjectFile.RESIZE);
 	private PolygonAttributes pa;
 	private Scene s = null;
+	private BranchGroup scenegroup;
 	private TransformGroup trans = new TransformGroup();
 	private Texture texture;
 	private TextureAttributes texAttr;
@@ -70,6 +71,7 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
     private Scrollbar	sb2;
     private Scrollbar	sb3;
     private Transform3D trans3d,trans3d2;
+    private Shape3D Poly;
     private Vector3f    sliderVector;
     private TransformGroup sliderTrans,sliderTrans2;
     private Panel p = new Panel();
@@ -102,47 +104,39 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         objRoot.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
         objRoot.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
         objRoot.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
-        objRoot.addChild(Ttrans);
+        
         
         // Add basic transform group
-        trans = new TransformGroup();              
-        trans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-        Ttrans.addChild(trans);
         
         // Add Rotate mouse Group
         MouseRotate mr = new MouseRotate();
-        mr.setTransformGroup(trans);
+        mr.setTransformGroup(Ttrans);
         BoundingSphere bounds = new BoundingSphere(new Point3d(10.0,10.0,10.0), 300.0);
         mr.setSchedulingBounds(bounds);
         objRoot.addChild(mr);
-        
-        trans.setCapability(trans.ALLOW_TRANSFORM_READ);
-        trans.setCapability(trans.ALLOW_TRANSFORM_WRITE);
-        
-        //TextureLoader loader = new TextureLoader(texturepath,"RPG", new Container());
-        
+
         // Add Scene Branchgroup
-        Scene s = readScene(objpath);
-        BranchGroup scenegroup = s.getSceneGroup();
+        s = readScene(objpath);
+        scenegroup = s.getSceneGroup();
         //Scene s2 = readScene(objpath);
         //BranchGroup scenegroup2 = s2.getSceneGroup();
         
         // Add Writbale polygon attributes 
-        Shape3D Poly = (Shape3D)scenegroup.getChild(0);
+        Poly = (Shape3D)scenegroup.getChild(0);
         Poly.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
         ap.setPolygonAttributes(pa);
-        Poly.setAppearance(appearance);
+        Poly.setAppearance(ap);
         
-        trans.addChild(scenegroup);
-        //trans.addChild(scenegroup2);
+        Ttrans.addChild(scenegroup);
         
         // Add Light
         Color3f light1Color = new Color3f(0.5f, 0.5f, 0.5f);
-        Vector3f light1Direction = new Vector3f(2.0f, -5.0f, -8.0f);
+        Vector3f light1Direction = new Vector3f(1.0f, -2.0f, -3.0f);
         DirectionalLight light1 = new DirectionalLight(light1Color, light1Direction);
         light1.setInfluencingBounds(bounds);
         objRoot.addChild(light1);
         
+        objRoot.addChild(Ttrans);
         //Compile the objRoot
         objRoot.compile();
 
@@ -171,7 +165,7 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 	public void adjustmentValueChanged(AdjustmentEvent e) {
 		x = (float)sb2.getValue()/20.0f;y=(float)sb.getValue()/20.0f;z = (float)sb3.getValue()/20.0f;
         trans3d.setTranslation(new Vector3d(x,y,z));
-        trans3d2.setTranslation(new Vector3d(x+0.05f,y,z));
+        trans3d2.setTranslation(new Vector3d(x+0.01f,y,z));
         sliderTrans.setTransform(trans3d);
         sliderTrans2.setTransform(trans3d2);
     }
@@ -232,7 +226,7 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         appearance2.setColoringAttributes(blueT);
         
         // Add TransparencyAttributes
-        TA = new TransparencyAttributes(TransparencyAttributes.NICEST, 0.4f);
+        TA = new TransparencyAttributes(TransparencyAttributes.NICEST, 0.6f);
         appearance.setTransparencyAttributes(TA);
         appearance2.setTransparencyAttributes(TA);
         
@@ -250,7 +244,7 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         sliderTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         
         trans3d2 = new Transform3D();
-        trans3d2.setTranslation(new Vector3d(x+0.05f,y,z));
+        trans3d2.setTranslation(new Vector3d(x+0.01f,y,z));
         trans3d.setScale(0.5);
         sliderTrans2 = new TransformGroup(trans3d2);
         sliderTrans2.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
@@ -312,6 +306,11 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 			pa.setPolygonMode(pa.POLYGON_FILL);
 		}
 		else if (e.getSource() == skin) {
+			if (is3D == 1){
+    			appearance.setColoringAttributes(null);
+    			template.removeChild(template2);
+    			is3D = 0;
+    		}
 			if (appearance.getTexture()!= null){
 				appearance.setTexture(null);
 			}
@@ -326,7 +325,7 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
     			//set transform group2
     			appearance.setColoringAttributes(redT);
     	        trans3d2 = new Transform3D();
-    	        trans3d2.setTranslation(new Vector3d(x+0.1f,y,z));
+    	        trans3d2.setTranslation(new Vector3d(x+0.01f,y,z));
     	        trans3d2.setScale(0.5);
     	        sliderTrans2 = new TransformGroup(trans3d2); 
     	        sliderTrans2.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
