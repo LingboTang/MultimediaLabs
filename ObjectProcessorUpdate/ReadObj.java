@@ -98,6 +98,10 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 
 		// Initial the BranchGroup
         BranchGroup objRoot = new BranchGroup();
+        objRoot.setCapability(BranchGroup.ALLOW_DETACH);
+        objRoot.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
+        objRoot.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+        objRoot.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
         objRoot.addChild(Ttrans);
         
         // Add basic transform group
@@ -219,7 +223,7 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
         appearance.setCapability(Appearance.ALLOW_TEXTURE_WRITE);
         appearance.setCapability(Appearance.ALLOW_POLYGON_ATTRIBUTES_WRITE);
         appearance.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_WRITE);
-        appearance.setTextureAttributes(texAttr);
+        //appearance.setTextureAttributes(texAttr);
         
         appearance2 = new Appearance();
         appearance2.setCapability(Appearance.ALLOW_TEXTURE_WRITE);
@@ -316,8 +320,25 @@ public class ReadObj extends Applet implements AdjustmentListener, ActionListene
 			}
 		}
 		else if (e.getSource() == HighDmode) {
-			trans.removeChild(0);
-			appearance.setTexture(null);			
+			//trans.removeChild(0);
+			appearance.setTexture(null);
+    		if (is3D == 0){
+    			//set transform group2
+    			appearance.setColoringAttributes(redT);
+    	        trans3d2 = new Transform3D();
+    	        trans3d2.setTranslation(new Vector3d(x+0.1f,y,z));
+    	        trans3d2.setScale(0.5);
+    	        sliderTrans2 = new TransformGroup(trans3d2); 
+    	        sliderTrans2.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+    	        sliderTrans2.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+    			template2 = createSceneGraph(sliderTrans2,trans3d2,appearance2);   	
+    			template.addChild(template2);
+    			is3D = 1;
+    		}else if (is3D == 1){
+    			appearance.setColoringAttributes(null);    			
+    			template.removeChild(template2);
+    			is3D = 0;
+    		}
 		}
 	}
 }
