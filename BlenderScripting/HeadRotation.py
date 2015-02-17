@@ -5,6 +5,8 @@
 import bpy, mathutils, math
 from mathutils import Vector
 from math import pi
+from math import radians
+
  
 def findMidPoint():
     sum = Vector((0,0,0))
@@ -107,6 +109,19 @@ def createCamera(origin, target):
     scn = bpy.context.scene
     scn.camera = ob
     return ob
+
+
+# http://stackoverflow.com/questions/16189503/blender-camera-rotation-with-python-not-planar
+def parent_obj_to_camera(b_obj, b_camera):
+    origin = (0,0,0) #can be replaced with b_obj.location
+    b_empty = bpy.data.objects.new("Empty", None)
+    b_empty.location = origin
+    b_camera.parent = b_empty #setup parenting
+
+    scn = bpy.context.scene
+    scn.objects.link(b_empty)
+    scn.objects.active = b_empty 
+    b_empty.select = True
  
 def run(origin):
     # Delete all old cameras and lamps
@@ -123,8 +138,18 @@ def run(origin):
     target = bpy.context.object
     target.name = 'Target'
  
-    createCamera(origin+Vector((50,90,50)), target)
+    createCamera(origin+Vector((20,20,20)), target)
     createLamps(origin, target)
+    b_empty = bpy.context.scene.active_object
+    num_steps = 1147
+    stepsize = 360/num_steps
+    for i in range(0, num_steps):
+        mat_rot = mathutils.Matrix.Rotation(radians(step), 4, 'Z')
+        b_empty.matrix_local *= mat_rot 
+
+        print("Rotation %01d" % (radians(stepsize)))
+        image = 'images/' + sys.argv[-1] + str(i) + '.' + filetype
+        render_thumb(image,gl=False)
     return
  
 if __name__ == "__main__":
