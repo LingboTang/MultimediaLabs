@@ -122,6 +122,17 @@ def parent_obj_to_camera(b_obj, b_camera):
     scn.objects.link(b_empty)
     scn.objects.active = b_empty 
     b_empty.select = True
+    
+    num_steps = 1147
+    stepsize = 360/num_steps
+    for i in range(0, num_steps):
+        mat_rot = mathutils.Matrix.Rotation(radians(step), 4, 'Z')
+        b_empty.matrix_local *= mat_rot 
+
+        print("Rotation %01d" % (radians(stepsize)))
+        image = 'images/' + sys.argv[-1] + str(i) + '.' + filetype
+        render_thumb(image,gl=False)
+    return
  
 def run(origin):
     # Delete all old cameras and lamps
@@ -138,18 +149,11 @@ def run(origin):
     target = bpy.context.object
     target.name = 'Target'
  
-    createCamera(origin+Vector((20,20,20)), target)
+    
     createLamps(origin, target)
+    b_camera = createCamera(origin+Vector((5,5,20)), target)
     b_empty = bpy.context.scene.active_object
-    num_steps = 1147
-    stepsize = 360/num_steps
-    for i in range(0, num_steps):
-        mat_rot = mathutils.Matrix.Rotation(radians(step), 4, 'Z')
-        b_empty.matrix_local *= mat_rot 
-
-        print("Rotation %01d" % (radians(stepsize)))
-        image = 'images/' + sys.argv[-1] + str(i) + '.' + filetype
-        render_thumb(image,gl=False)
+    parent_obj_to_camera(b_empty,b_camera)
     return
  
 if __name__ == "__main__":
