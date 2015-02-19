@@ -19,19 +19,6 @@ lBipedMap = (('Reference', 'BVH:reference'),
         ( 'RightHand', 'BVH:RightHand'),
         ( 'Head', 'BVH:Head'),
         ( 'Neck', 'BVH:Neck'))
-
- 
-def findMidPoint():
-    sum = Vector((0,0,0))
-    n = 0
-    for ob in bpy.data.objects:
-        if ob.type not in ['CAMERA', 'LAMP', 'EMPTY']:
-            sum += ob.location
-            n += 1
-    if n == 0:
-        return sum
-    else:
-        return sum/n
  
 def addTrackToConstraint(ob, name, target):
     cns = ob.constraints.new('TRACK_TO')
@@ -94,7 +81,7 @@ def createCamera(origin, target):
     bpy.ops.object.add(
         type='CAMERA',
         location=origin,
-        rotation=(pi/2,0,pi))        
+        rotation=(0,0,0))        
     ob = bpy.context.object
     ob.name = 'MyCamOb'
     cam = ob.data
@@ -104,17 +91,14 @@ def createCamera(origin, target):
  
     # Lens
     cam.type = 'PERSP'
-    cam.lens = 1000
+    cam.lens = 150
     cam.lens_unit = 'MILLIMETERS'
     cam.shift_x = -0.05
     cam.shift_y = 0.1
     cam.clip_start = 0.0
     cam.clip_end = 250.0
  
-    empty = bpy.data.objects.new('DofEmpty', None)
-    empty.location = origin+Vector((0,10,0))
-    cam.dof_object = empty
- 
+    
     # Display
     cam.show_title_safe = True
     cam.show_name = True
@@ -132,14 +116,14 @@ def run(origin):
             scn.objects.unlink(ob)
  
     # Add an empty at the middle of all render objects
-    midpoint = findMidPoint()
+    
     skel_obj= bpy.data.objects['131_09_60fps']
     bpy.ops.object.add(
         type='EMPTY',
-        location=midpoint),
+        location=origin),
     target = skel_obj
     target.name = 'Target'
-    createCamera(origin+Vector((50,90,50)), target)
+    createCamera(origin+Vector((0,0,0)), target)
     createLamps(origin, target)
     return
  
