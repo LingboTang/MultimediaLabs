@@ -1,7 +1,3 @@
-#----------------------------------------------------------
-# File camera.py
-# Adds one camera and several lights
-#----------------------------------------------------------
 import bpy, mathutils, math
 from mathutils import *
 from math import *
@@ -41,6 +37,7 @@ def addTrackToConstraint(ob, name, target):
     cns = ob.constraints.new('TRACK_TO')
     cns.name = name
     cns.target = target
+    cns.subtarget = 'Head'
     cns.track_axis = 'TRACK_NEGATIVE_Z'
     cns.up_axis = 'UP_Y'
     cns.owner_space = 'WORLD'
@@ -107,11 +104,11 @@ def createCamera(origin, target):
  
     # Lens
     cam.type = 'PERSP'
-    cam.lens = 75
+    cam.lens = 1000
     cam.lens_unit = 'MILLIMETERS'
     cam.shift_x = -0.05
     cam.shift_y = 0.1
-    cam.clip_start = 10.0
+    cam.clip_start = 0.0
     cam.clip_end = 250.0
  
     empty = bpy.data.objects.new('DofEmpty', None)
@@ -140,16 +137,9 @@ def run(origin):
     bpy.ops.object.add(
         type='EMPTY',
         location=midpoint),
-    thisOb = skel_obj.get('ARMATURE')
-    pose = thisOb.getPose()
-    for bonename in pose.bones.keys():
-        if bonename == 'Head':
-            Head = pose.bones[bonename]
     target = skel_obj
     target.name = 'Target'
-    subtarget = Head
-    subtarget.name = 'Target_Head'
-    createCamera(origin+Vector((50,90,50)), subtarget)
+    createCamera(origin+Vector((50,90,50)), target)
     createLamps(origin, target)
     return
  
