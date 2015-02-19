@@ -1,24 +1,6 @@
 import bpy, mathutils, math
 from mathutils import *
 from math import *
-
-lBipedMap = (('Reference', 'BVH:reference'),
-        ('Hips','BVH:Hips'),
-        ( 'LeftUpLeg', 'BVH:LeftUpLeg' ),
-        ( 'LeftLeg', 'BVH:LeftLeg' ),
-        ( 'LeftFoot', 'BVH:LeftFoot'),
-        ( 'RightUpLeg', 'BVH:RightUpLeg'),
-        ( 'RightLeg', 'BVH:RightLeg'),
-        ( 'RightFoot', 'BVH:RightFoot'),
-        ( 'Spine', 'BVH:Spine'),
-        ( 'LeftArm', 'BVH:LeftArm'),
-        ( 'LeftForeArm', 'BVH:LeftForeArm'),
-        ( 'LeftHand', 'BVH:LeftHand'),
-        ( 'RightArm', 'BVH:RightArm'),
-        ( 'RightForeArm', 'BVH:RightForeArm'),
-        ( 'RightHand', 'BVH:RightHand'),
-        ( 'Head', 'BVH:Head'),
-        ( 'Neck', 'BVH:Neck'))
  
 def addTrackToConstraint(ob, name, target):
     cns = ob.constraints.new('TRACK_TO')
@@ -98,11 +80,6 @@ def createCamera(origin, target):
     cam.clip_start = 0.0
     cam.clip_end = 250.0
  
-    
-    # Display
-    cam.show_title_safe = True
-    cam.show_name = True
- 
     # Make this the current camera
     scn = bpy.context.scene
     scn.camera = ob
@@ -114,14 +91,9 @@ def run(origin):
     for ob in scn.objects:
         if ob.type == 'CAMERA' or ob.type == 'LAMP':
             scn.objects.unlink(ob)
- 
-    # Add an empty at the middle of all render objects
     
     skel_obj= bpy.data.objects['131_09_60fps']
-    bpy.ops.object.add(
-        type='EMPTY',
-        location=origin),
-    target = skel_obj
+    target = bpy.context.object
     target.name = 'Target'
     createCamera(origin+Vector((0,0,0)), target)
     createLamps(origin, target)
