@@ -137,16 +137,19 @@ def run(origin):
     # Add an empty at the middle of all render objects
     midpoint = findMidPoint()
     skel_obj= bpy.data.objects['131_09_60fps']
-    '''bpy.ops.object.add(
+    bpy.ops.object.add(
         type='EMPTY',
-        location=midpoint),'''
-    for childrens in skel_obj.children():
-        if childrens == 'Head':
-            skel_obj_head = skel_obj.children()
-    target = skel_obj_head
+        location=midpoint),
+    thisOb = skel_obj.get('ARMATURE')
+    pose = thisOb.getPose()
+    for bonename in pose.bones.keys():
+        if bonename == 'Head':
+            Head = pose.bones[bonename]
+    target = skel_obj
     target.name = 'Target'
- 
-    createCamera(origin+Vector((50,90,50)), target)
+    subtarget = Head
+    subtarget.name = 'Target_Head'
+    createCamera(origin+Vector((50,90,50)), subtarget)
     createLamps(origin, target)
     return
  
