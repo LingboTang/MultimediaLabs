@@ -3,8 +3,27 @@
 # Adds one camera and several lights
 #----------------------------------------------------------
 import bpy, mathutils, math
-from mathutils import Vector
-from math import pi
+from mathutils import *
+from math import *
+
+lBipedMap = (('Reference', 'BVH:reference'),
+        ('Hips','BVH:Hips'),
+        ( 'LeftUpLeg', 'BVH:LeftUpLeg' ),
+        ( 'LeftLeg', 'BVH:LeftLeg' ),
+        ( 'LeftFoot', 'BVH:LeftFoot'),
+        ( 'RightUpLeg', 'BVH:RightUpLeg'),
+        ( 'RightLeg', 'BVH:RightLeg'),
+        ( 'RightFoot', 'BVH:RightFoot'),
+        ( 'Spine', 'BVH:Spine'),
+        ( 'LeftArm', 'BVH:LeftArm'),
+        ( 'LeftForeArm', 'BVH:LeftForeArm'),
+        ( 'LeftHand', 'BVH:LeftHand'),
+        ( 'RightArm', 'BVH:RightArm'),
+        ( 'RightForeArm', 'BVH:RightForeArm'),
+        ( 'RightHand', 'BVH:RightHand'),
+        ( 'Head', 'BVH:Head'),
+        ( 'Neck', 'BVH:Neck'))
+
  
 def findMidPoint():
     sum = Vector((0,0,0))
@@ -92,7 +111,7 @@ def createCamera(origin, target):
     cam.lens_unit = 'MILLIMETERS'
     cam.shift_x = -0.05
     cam.shift_y = 0.1
-    cam.clip_start = 0.0
+    cam.clip_start = 10.0
     cam.clip_end = 250.0
  
     empty = bpy.data.objects.new('DofEmpty', None)
@@ -118,12 +137,16 @@ def run(origin):
     # Add an empty at the middle of all render objects
     midpoint = findMidPoint()
     skel_obj= bpy.data.objects['131_09_60fps']
-    bpy.ops.object.add(
-        type = 'ARMATURE',
-        location = midpoint),
-    target = bpy.context.object
+    '''bpy.ops.object.add(
+        type='EMPTY',
+        location=midpoint),'''
+    for childrens in skel_obj.children():
+        if childrens == 'Head':
+            skel_obj_head = skel_obj.children()
+    target = skel_obj_head
     target.name = 'Target'
-    createCamera(origin+Vector((5,5,20)), target)
+ 
+    createCamera(origin+Vector((50,90,50)), target)
     createLamps(origin, target)
     return
  
