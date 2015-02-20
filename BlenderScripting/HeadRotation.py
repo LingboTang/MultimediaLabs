@@ -3,10 +3,14 @@ from mathutils import *
 from math import *
  
 def addTrackToConstraint(ob, name, target):
-    cns = ob.constraints.new('CHILD_OF')
+    cns = ob.constraints.new('TRACK_TO')
     cns.name = name
     cns.target = target
     cns.subtarget = 'Head'
+    cns.track_axis = 'TRACK_NEGATIVE_Z'
+    cns.up_axis = 'UP_Y'
+    cns.owner_space = 'WORLD'
+    cns.target_space = 'WORLD'
     return
  
 def createCamera(origin, target):
@@ -24,7 +28,7 @@ def createCamera(origin, target):
  
     # Lens
     cam.type = 'PERSP'
-    cam.lens = 150
+    cam.lens = 75
     cam.lens_unit = 'MILLIMETERS'
     cam.shift_x = -0.05
     cam.shift_y = 0.1
@@ -56,15 +60,16 @@ def run(origin):
         location=origin),
     target = skel_obj
     target.name = 'Target'
-    b_cam = createCamera(origin+Vector((0,5,0)), target)
+    b_cam = createCamera(target.location+Vector((0,5,0)), target)
     frame_num = 0
     x_radians = 0
     y_radians = 0
     z_radians = 0
+    b_cam.rotation_mode = 'XYZ'
     for i in range(1148):
         bpy.context.scene.frame_set(frame_num)
-        z_radians += float(2*pi/1147)
-        target.rotation_euler =(x_radians,y_radians,z_radians)
+        z_radians += float(2*pi/250)
+        b_cam.rotation_euler =(x_radians,y_radians,z_radians)
         bpy.ops.anim.keyframe_insert(type='Rotation',confirm_success=True)
         frame_num+=1
     return
